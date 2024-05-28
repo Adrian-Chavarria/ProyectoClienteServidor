@@ -1,0 +1,631 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package nuevoClienteServidor;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.net.Socket;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import Servidor.Communication;
+import Servidor.Server;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.ListModel;
+import javax.swing.event.ListSelectionEvent;
+import javafx.application.Platform;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+
+/*
+    The ViewClient class represents the graphical interface of the client in an application communicating with a server.
+ * Allows users to view and select music, videos and documents available on the server, as well as log out.
+ * @author ESTUDIANTE
+ */
+public class ViewClient extends javax.swing.JFrame {
+
+    backgroundPanel fondo = new backgroundPanel();
+    private final String username;
+    private final Communication communication;
+    private final Socket socket;
+    private static final String SERVER_ADDRESS = "192.168.0.2";
+    private static final int SERVER_PORT = 8081;
+    private String rol;
+
+    /**
+     * * Constructor of the ViewClient class.
+     *
+     * @param username Username of the client.
+     * @param clientCommunication Client communication object with the server.
+     * @param rol Role of the client in the application.
+     *
+     * This constructor initializes a ViewClient instance with the username, the
+     * client-server communication object and the role of the client. Configures
+     * the graphical interface with the information provided, connects to the
+     * server, initializes JavaFX, Updates the welcome message, and sets
+     * listeners for selecting items in music, video and document lists. When an
+     * item is selected in a list, the corresponding file is downloaded from the
+     * server and displayed the appropriate player for that file type.
+     * 
+     */
+    public ViewClient(String username, Communication clientCommunication, String rol) {
+        this.rol = rol;
+        this.username = username;
+        this.communication = clientCommunication;
+        socket = LoginClient.sharedSocket;
+        System.out.println("Socket compartido desde el login con Client: " + socket);
+
+        if (socket == null) {
+
+            System.err.println("El socket es nulo");
+            return;
+        }
+        this.setContentPane(fondo);
+        initComponents();
+        connectToServer();
+        initializeJavaFx();
+        updateWelcomeMessage(username);
+        MusicList.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+            if (!e.getValueIsAdjusting()) {
+
+                String selectedSong = MusicList.getSelectedValue();
+                if (selectedSong != null) {
+                    try {
+                        downloadFileFromServer(selectedSong, "MUSIC");
+                        showMusicPlayer(selectedSong);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViewClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }
+        });
+        VideoList.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+            if (!e.getValueIsAdjusting()) {
+
+                String selectedVideo = VideoList.getSelectedValue();
+                if (selectedVideo != null) {
+                    try {
+                        downloadFileFromServer(selectedVideo, "VIDEO");
+                        showVideoPlayer(selectedVideo);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViewClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }
+        });
+
+        DocList.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+            if (!e.getValueIsAdjusting()) {
+
+                String selectedFile = DocList.getSelectedValue();
+                if (selectedFile != null) {
+                    try {
+
+                        downloadFileFromServer(selectedFile, "FILE");
+                        showDocPlayer(selectedFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViewClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+            }
+        });
+
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        VideoList = new javax.swing.JList<>();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        btnCerrarSesion = new javax.swing.JButton();
+        JLVideo = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        VideoList1 = new javax.swing.JList<>();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        DocList = new javax.swing.JList<>();
+        jPanel4 = new javax.swing.JPanel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        MusicList = new javax.swing.JList<>();
+        JLVideo1 = new javax.swing.JLabel();
+        JLVideo2 = new javax.swing.JLabel();
+
+        jLabel3.setText("jLabel3");
+
+        jScrollPane3.setViewportView(VideoList);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jPanel1.setBackground(java.awt.SystemColor.activeCaption);
+
+        jLabel1.setFont(new java.awt.Font("Microsoft YaHei UI", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel1.setText("Nombre");
+
+        btnCerrarSesion.setBackground(java.awt.SystemColor.activeCaption);
+        btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnCerrarSesion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCerrarSesionActionPerformed(evt);
+            }
+        });
+
+        JLVideo.setFont(new java.awt.Font("Source Serif Pro Semibold", 2, 48)); // NOI18N
+        JLVideo.setForeground(new java.awt.Color(0, 0, 0));
+        JLVideo.setText("Documentos");
+        JLVideo.setToolTipText("");
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
+        jScrollPane4.setViewportView(VideoList1);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 315, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(43, 43, 43)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGap(44, 44, 44)))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 416, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(20, 20, 20)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(17, Short.MAX_VALUE)))
+        );
+
+        jLabel2.setBackground(java.awt.SystemColor.activeCaptionBorder);
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel2.setText("Cerrar Sesión");
+
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Captura_de_pantalla_2024-05-26_223758-removebg-preview.png"))); // NOI18N
+
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+
+        jScrollPane6.setViewportView(DocList);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 315, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addGap(43, 43, 43)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGap(44, 44, 44)))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 416, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addGap(20, 20, 20)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(17, Short.MAX_VALUE)))
+        );
+
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+
+        jScrollPane5.setViewportView(MusicList);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 315, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addGap(43, 43, 43)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGap(44, 44, 44)))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 416, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addGap(20, 20, 20)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(17, Short.MAX_VALUE)))
+        );
+
+        JLVideo1.setFont(new java.awt.Font("Source Serif Pro Semibold", 2, 48)); // NOI18N
+        JLVideo1.setForeground(new java.awt.Color(0, 0, 0));
+        JLVideo1.setText("Videos ");
+        JLVideo1.setToolTipText("");
+
+        JLVideo2.setFont(new java.awt.Font("Source Serif Pro Semibold", 2, 48)); // NOI18N
+        JLVideo2.setForeground(new java.awt.Color(0, 0, 0));
+        JLVideo2.setText("Musica");
+        JLVideo2.setToolTipText("");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(45, 45, 45)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(16, 16, 16))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jLabel4)
+                        .addGap(35, 35, 35)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 494, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(293, 293, 293)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(51, 51, 51))
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(135, 135, 135)
+                        .addComponent(JLVideo1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(JLVideo, javax.swing.GroupLayout.PREFERRED_SIZE, 286, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(24, 24, 24))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addContainerGap(487, Short.MAX_VALUE)
+                    .addComponent(JLVideo2)
+                    .addGap(457, 457, 457)))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(14, 14, 14)
+                        .addComponent(btnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(28, 28, 28)
+                        .addComponent(JLVideo1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(JLVideo, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(48, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGap(151, 151, 151)
+                    .addComponent(JLVideo2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(467, Short.MAX_VALUE)))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+    /**
+     * * Connect the client to the server and retrieve music lists, files and videos.
+ * Send messages to the server requesting music, files and videos based on the client's role and
+ * the shared authentication token. Processes server responses and updates lists
+ * corresponding in the graphical interface.
+ */
+     
+    
+    private void connectToServer() {
+
+        try {
+
+            communication.sendMessage("GET_MUSIC" + "," + rol + "," + LoginClient.sharedAuth);
+
+            String serverResponse = communication.receiveMessage();
+            System.out.println("Respuesta del servidor para el cliente: " + serverResponse);
+
+            ListModel<String> songs = processServerResponse(serverResponse);
+            updateMusicList(songs);
+
+            communication.sendMessage("GET_FILES," + rol + "," + LoginClient.sharedAuth);
+
+            String serverResponseFiles = communication.receiveMessage();
+            System.out.println("Files from server: " + serverResponseFiles);
+
+            ListModel<String> fileListModel = processServerResponse(serverResponseFiles);
+            updateDocList(fileListModel);
+
+            communication.sendMessage("GET_VIDEOS," + rol + "," + LoginClient.sharedAuth);
+
+            String serverResponseVideos = communication.receiveMessage();
+            System.out.println("Videos from server: " + serverResponseVideos);
+
+            ListModel<String> videoListModel = processServerResponse(serverResponseVideos);
+            updateVideoList(videoListModel);
+
+            System.out.println("Lista de musica: " + songs);
+            System.out.println("Lista de archivos: " + fileListModel);
+            System.out.println("Lista de videos: " + videoListModel);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+/**
+ * Update the list of videos in the graphical interface.
+ * 
+ * @param videos List of videos to display.
+ */
+    public void updateVideoList(ListModel<String> videos) {
+
+        VideoList1.setModel(videos);
+    }
+/**
+ * Update the music list in the graphical interface.
+ * 
+ * @param music List of music to display.
+ */
+    public void updateMusicList(ListModel<String> musica) {
+
+        MusicList.setModel(musica);
+    }
+/**
+ * Actualiza la lista de documentos en la interfaz gráfica.
+ * 
+ * @param files Lista de documentos a mostrar.
+ */
+    public void updateDocList(ListModel<String> files) {
+
+        DocList.setModel(files);
+    }
+/**
+ * Processes the server response to generate a list model.
+ * The server response is expected to be in a format where the elements
+ * in the list are separated by a semicolon (';'). The answer ends with
+ * the string "END_OF_LIST".
+ * 
+ * @param response Response from the server with the list elements separated by ';'.
+ * @return A ListModel<String> with the processed elements.
+ */
+    private ListModel<String> processServerResponse(String response) {
+
+        DefaultListModel<String> songListModel = new DefaultListModel<>();
+        String[] songsArray = response.split(";");
+
+        for (String song : songsArray) {
+            if (song.equals("END_OF_LIST")) {
+                break;
+            }
+            songListModel.addElement(song);
+        }
+
+        return songListModel;
+    }
+
+    /**
+ * Closes the socket if it is open.
+ * This method attempts to close the socket used for communication if it is not already closed.
+ * If an error occurs during socket closing, an error message is printed.
+ */
+    private void closeSocket() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error al cerrar el socket: " + e.getMessage());
+        }
+    }
+
+    private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
+        closeSocket();
+        this.dispose();
+        JOptionPane.showMessageDialog(this, "Sesión cerrada " + username + " ,vuelve pronto!");
+    }//GEN-LAST:event_btnCerrarSesionActionPerformed
+
+    /**
+ * Download a file from the server.
+ * 
+ * This method connects to the server and requests the download of a specific file.
+ * Uses a socket for communication and handling of binary data stream.
+ * 
+ * @param file The name of the file to download.
+ * @param type The type of file to download (e.g. "MUSIC", "VIDEO", "FILE").
+ * @throws IOException If an error occurs during the connection or data transfer.
+ */
+    private void downloadFileFromServer(String file, String tipo) throws IOException {
+        int TIMEOUT = 500;
+        System.out.println("Estamos descargando...");
+        if (LoginClient.sharedAuth) {
+            System.out.println("Entro a la descarga");
+            try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT); PrintWriter out = new PrintWriter(socket.getOutputStream(), true); BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); OutputStream binaryOut = socket.getOutputStream(); InputStream binaryIn = socket.getInputStream()) {
+
+                Communication clientCommunication = new Communication(socket, out, in, binaryOut, binaryIn);
+                System.out.println(LoginClient.sharedAuth);
+                clientCommunication.sendMessage("DOWNLOAD," + tipo + "," + file + "," + rol + "," + LoginClient.sharedAuth);
+                clientCommunication.receiveFileFromServer("download/" + file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+
+            System.err.println("El usuario no está autenticado.");
+        }
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(TIMEOUT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+/**
+ * Shows the music player.
+ * 
+ * This method creates a new instance of `PlayerMusic` with the selected music 
+ * and active communication, then makes it visible.
+ * 
+ * @param selectedMusic The name of the selected music file.
+ * @throws IOException If an error occurs while creating the music player.
+ */
+    private void showMusicPlayer(String selectedMusic) throws IOException {
+
+        PlayerMusic playerFrame = new PlayerMusic(selectedMusic, communication);
+        playerFrame.setVisible(true);
+    }
+
+    /**
+ * Shows the video player.
+ * 
+ * This method creates a new instance of `PlayerVideo` with the selected video 
+ * and then makes it visible.
+ * 
+ * @param selectedVideo The name of the selected video file.
+ */
+    private void showVideoPlayer(String selectedVideo) {
+
+        PlayerVideo playerFrame = new PlayerVideo(selectedVideo);
+        playerFrame.setVisible(true);
+    }
+/**
+ * Shows the document viewer.
+ * 
+ * This method creates a new instance of `PlayerDocs` with the selected document 
+ * and then makes it visible.
+ * 
+ * @param selectedDoc The name of the selected document file.
+ */
+    private void showDocPlayer(String selectedDoc) {
+
+        PlayerDocs playerFrame = new PlayerDocs(selectedDoc);
+        playerFrame.setVisible(true);
+    }
+
+/**
+ * Updates the welcome message.
+ * 
+ * This method sets a custom welcome message with the username 
+ * and displays it in `jLabel1`.
+ * 
+ * @param username The username to personalize the welcome message.
+ */
+    public void updateWelcomeMessage(String username) {
+
+        String welcomeMessage = "Bienvenido a CyberByte " + username + "!";
+        jLabel1.setText(welcomeMessage);
+    }
+/**
+ * Initializes the JavaFX environment.
+ * 
+ * This method ensures that the JavaFX environment is initialized. If the current thread 
+ * is not the JavaFX application thread, it starts the JavaFX environment.
+ */
+    private void initializeJavaFx() {
+
+        if (!Platform.isFxApplicationThread()) {
+            Platform.startup(() -> {
+
+            });
+        }
+    }
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.JList<String> DocList;
+    private javax.swing.JLabel JLVideo;
+    private javax.swing.JLabel JLVideo1;
+    private javax.swing.JLabel JLVideo2;
+    public javax.swing.JList<String> MusicList;
+    public javax.swing.JList<String> VideoList;
+    public javax.swing.JList<String> VideoList1;
+    private javax.swing.JButton btnCerrarSesion;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    // End of variables declaration//GEN-END:variables
+
+    class backgroundPanel extends JPanel {
+
+        private Image imagen;
+
+        @Override
+        public void paint(Graphics g) {
+
+            imagen = new ImageIcon(getClass().getResource("/Imagenes/fondoAzul.png")).getImage();
+
+            g.drawImage(imagen, 0, 0, getWidth(), getHeight(), this);
+
+            setOpaque(false);
+
+            super.paint(g);
+        }
+
+    }
+}

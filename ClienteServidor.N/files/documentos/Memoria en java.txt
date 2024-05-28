@@ -1,0 +1,14 @@
+La memoria en Java se refiere al espacio de almacenamiento que se utiliza para almacenar datos y objetos durante la ejecución de un programa Java
+En conclusión, el programa es un código guardado en un medio de almacenamiento para una fase previa del proceso. El proceso es un evento de ese programa en ejecución.
+Memoria estática : Solicitud de memoria en tiempos de compilación.
+ Memoria dinámica: Solicitud de memoria en tiempos de ejecución
+Código: espacio de memoria donde se almacena las instrucciones en código máquina (código de byte) del programa ejecutable
+El stack se utiliza para almacenar variables locales y referencias a objetos.
+El heap se utiliza para almacenar objetos y arreglos de tamaño variable.
+Puntero Un variable (atributo) de tipo Puntero (Pointer) es una localidad en memoria cuyo contenido es una referencia o dirección a otra localidad en memoria.
+Nota: En JAVA todas las variables son de tipo puntero, es decir son referencias a objetos, salvo los tipos primitivos. El lenguaje de programación JAVA 
+define 8 tipos primitivos: 
+- boolean (Lógico) 
+- char (texto)= 2bytes
+ – byte= 1, short= 2, int= 4, long=8 (números enteros) 
+- float=4 , double = 8 (números reales)
